@@ -1,0 +1,10 @@
+spring:
+  data:
+    mongodb:
+      host: mongo
+      port: 27017
+      username: db_user
+      password: Wzj_mysql01
+      repositories:
+        type: auto
+      database: image-service

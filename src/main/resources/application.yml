@@ -1,0 +1,13 @@
+server:
+  port: ${server_port:8080}
+
+spring:
+  application:
+    name: image-service
+  profiles:
+    include: mongodb
+
+# Set log level
+logging:
+  level:
+    root: INFO
