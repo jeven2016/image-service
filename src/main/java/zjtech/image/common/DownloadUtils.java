@@ -43,7 +43,7 @@ public class DownloadUtils {
 
       configProps.getRequestHeaders().forEach(connection::setRequestProperty);
       connection.setRequestMethod(configProps.getRequestMethod());
-      connection.setConnectTimeout(configProps.getTimeout());
+//      connection.setConnectTimeout(configProps.getTimeout());
 
       try (BufferedInputStream bis = new BufferedInputStream(connection.getInputStream());
            FileOutputStream fis = new FileOutputStream("/tmp/" + imageName)) {
@@ -58,10 +58,7 @@ public class DownloadUtils {
       InputStream inputStream = new FileInputStream("/tmp/" + imageName);
 
 //      String fileExtension = StringUtils.getFilenameExtension(urlStr);
-      String fileExtension = null;
-      if (urlStr.lastIndexOf(".jpg") > -1) {
-        fileExtension = "jpg";
-      }
+      String fileExtension = "jpg";
       if (urlStr.lastIndexOf(".png") > -1) {
         fileExtension = "png";
       }
