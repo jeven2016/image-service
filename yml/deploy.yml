@@ -1,0 +1,38 @@
+version: '2'
+services:
+  mongo:
+    image: mongo
+    ports:
+    - '27017:27017'
+    # restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: db_user
+      MONGO_INITDB_ROOT_PASSWORD: Wzj_mysql01
+    volumes:
+    - '/opt/data/mongodb:/data/db'
+
+  admin-mongo:
+    image: mrvautin/adminmongo
+    # restart: always
+    ports:
+    - '5803:1234'
+
+  tracker1:
+    image: ygqygq2/fastdfs-nginx
+    command: tracker
+    network_mode: host
+    volumes:
+    - /opt/data/fdfs/tracker1:/var/fdfs
+    - /opt/data/fdfs/tracker1/logs/:/var/fdfs/logs/
+
+  storage1:
+    image: ygqygq2/fastdfs-nginx
+    command: storage
+    network_mode: host
+    volumes:
+    - /opt/data/fdfs/g1_storage1:/var/fdfs
+    environment:
+    - TRACKER_SERVER=192.168.43.124:22122
+    - GROUP_NAME=group1
+    depends_on:
+    - tracker1

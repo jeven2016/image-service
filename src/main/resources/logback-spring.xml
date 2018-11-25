@@ -11,7 +11,7 @@
 
   <property name="LOG_FILE" value="/var/log/${appName}"/>
 
-  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+  <appender class="ch.qos.logback.core.rolling.RollingFileAppender" name="FILE">
     <encoder>
       <pattern>${FILE_LOG_PATTERN}</pattern>
     </encoder>
@@ -26,7 +26,7 @@
     </triggeringPolicy>
   </appender>
 
-  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+  <appender class="ch.qos.logback.core.ConsoleAppender" name="CONSOLE">
     <encoder>
       <pattern>${CONSOLE_LOG_PATTERN}</pattern>
       <charset>utf8</charset>

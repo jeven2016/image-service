@@ -5,21 +5,21 @@ apply from: 'dependencies.gradle'
  * Apply global settings to all projects
  */
 buildscript {
-    apply from: 'dependencies.gradle'
-    repositories {
-        maven {
-            //then try to retrieve jars from nexus
-            url nexusPublicUrl
-        }
-        jcenter()
+  apply from: 'dependencies.gradle'
+  repositories {
+    maven {
+      //then try to retrieve jars from nexus
+      url nexusPublicUrl
     }
+    jcenter()
+  }
 
-    dependencies {
-        classpath libs.'spring-boot-gradle-plugin'
-        classpath libs.'dependency-management-plugin'  //todo : not sure if it is required here
+  dependencies {
+    classpath libs.'spring-boot-gradle-plugin'
+    classpath libs.'dependency-management-plugin'  //todo : not sure if it is required here
 //            classpath libs.'sonarqube-gradle-plugin'
 //            classpath libs.'spring-cloud-contract-gradle-plugin'
-    }
+  }
 }
 
 apply plugin: 'java'
@@ -47,115 +47,121 @@ version = projectInfo.version
 archivesBaseName = rootProject.name
 
 repositories {
-    maven {
-        //then try to retrieve jars from nexus
-        url nexusPublicUrl
-    }
-    jcenter()
+  maven {
+    //then try to retrieve jars from nexus
+    url nexusPublicUrl
+  }
+  jcenter()
 }
 
 configurations {
-    //exclude commons-loggin since we use logback+slf4j libs
-    all*.exclude module: 'commons-logging'
+  //exclude commons-loggin since we use logback+slf4j libs
+  all*.exclude module: 'commons-logging'
 }
 
 
 dependencies {
-    compile libs.lombok
-    compile libs.'spring-boot-starter-webflux'
-    compile libs.'spring-boot-starter-cache'
-    compile libs.'spring-boot-starter-aop'
-    compile libs.'spring-boot-starter-data-mongodb-reactive'
-    compile libs.'spring-boot-starter-data-redis-reactive'
+  compile libs.lombok
+  compile libs.'spring-boot-starter-webflux'
+//    compile libs.'spring-boot-starter-cache'
+  compile libs.'spring-boot-starter-aop'
+//  compile libs.'spring-boot-starter-data-mongodb-reactive'
+  compile libs.'spring-boot-starter-data-mongodb'
+//    compile libs.'spring-boot-starter-data-redis-reactive'
+  compile libs.fastdfs
 
-    testCompile libs.'spring-boot-starter-test'
+  compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
+
+  testCompile libs.'spring-boot-starter-test'
 }
 
+compileJava.dependsOn(processResources)
+
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.4.1'
+  gradleVersion = '4.4.1'
 }
 
 /**
  * List all jars this project depends on
  */
 task listJars(description: 'Display all dependencies.') {
-    doLast {
-        configurations.compile.each { File file -> println "\t" + file.name }
-    }
+  doLast {
+    configurations.compile.each { File file -> println "\t" + file.name }
+  }
 }
 
 /**
  * Configuration for checkstyle, the google checks file is applied by default
  */
 checkstyle {
-    toolVersion = "7.8.1"
-    sourceSets = [sourceSets.main]
-    configFile = project(":").file('config/checkstyle/google_checks.xml')
-    ignoreFailures = true
-    showViolations = true
+  toolVersion = "7.8.1"
+  sourceSets = [sourceSets.main]
+  configFile = project(":").file('config/checkstyle/google_checks.xml')
+  ignoreFailures = true
+  showViolations = true
 }
 
 //the test code is ignored
 checkstyleTest {
-    enabled = false
+  enabled = false
 }
 
 tasks.withType(Checkstyle) {
-    reports {
-        xml.enabled false
-        html.enabled true
-    }
+  reports {
+    xml.enabled false
+    html.enabled true
+  }
 }
 
 /**
  * Configuration for FindBugs
  */
 findbugs {
-    toolVersion = "3.0.1"
-    ignoreFailures = true
-    findbugsTest.enabled = false
-    sourceSets = [sourceSets.main]
-    effort = "max"
+  toolVersion = "3.0.1"
+  ignoreFailures = true
+  findbugsTest.enabled = false
+  sourceSets = [sourceSets.main]
+  effort = "max"
 }
 
 tasks.withType(FindBugs) {
-    reports {
-        xml.enabled = false
-        html.enabled = true
-    }
+  reports {
+    xml.enabled = false
+    html.enabled = true
+  }
 }
 
 /**
  * Configuration for PMD
  */
 pmd {
-    toolVersion = '6.0.0'
-    ignoreFailures = true
-    pmdTest.enabled = false
-    ruleSetFiles = project(":").files("config/pmd/pmd-rulesets.xml")
+  toolVersion = '6.0.0'
+  ignoreFailures = true
+  pmdTest.enabled = false
+  ruleSetFiles = project(":").files("config/pmd/pmd-rulesets.xml")
 }
 
 tasks.withType(Pmd) {
-    reports {
-        xml.enabled = false
-        html.enabled = true
-    }
+  reports {
+    xml.enabled = false
+    html.enabled = true
+  }
 }
 
 /**
  * Configuration for Jacoco
  */
 jacoco {
-    toolVersion = "0.8.0"
+  toolVersion = "0.8.0"
 }
 
 jacocoTestReport {
-    group = "Reporting"
-    reports {
-        xml.enabled false
-        html.enabled true
-        html.destination project(":").file("${buildDir}/reports/coverage")
-    }
+  group = "Reporting"
+  reports {
+    xml.enabled false
+    html.enabled true
+    html.destination project(":").file("${buildDir}/reports/coverage")
+  }
 }
 
 check.dependsOn jacocoTestReport
@@ -179,35 +185,35 @@ check.dependsOn jacocoTestReport
  * The task to generate a sources jar
  */
 task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+  classifier = 'sources'
+  from sourceSets.main.allSource
 }
 
 /**
  * The task to generate a javadoc jar
  */
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
+  classifier = 'javadoc'
+  from javadoc.destinationDir
 }
 
 //in addition generate the sources and java doc jars locally
 artifacts {
-    archives sourcesJar
+  archives sourcesJar
 //    archives javadocJar
 }
 
 publish {
-    dependsOn assemble
+  dependsOn assemble
 }
 
 publishing {
-    publications {
-        maven(MavenPublication) {
-            //only publish javadoc and spring boot executable jars to nexus
-            artifact javadocJar
-            artifact jar
-        }
+  publications {
+    maven(MavenPublication) {
+      //only publish javadoc and spring boot executable jars to nexus
+      artifact javadocJar
+      artifact jar
+    }
 /*
       //for publishing contract test related stubs jar, enable it as needed
       stubs(MavenPublication) {
@@ -215,21 +221,21 @@ publishing {
         artifactId "${project.name}-contract"
         artifact verifierStubsJar
       }*/
-    }
-    repositories {
-        maven {
-            credentials {
-                username = nexusUsername
-                password = nexusPassword
-            }
+  }
+  repositories {
+    maven {
+      credentials {
+        username = nexusUsername
+        password = nexusPassword
+      }
 
-            if (project.version.contains("-SNAPSHOT")) {
-                url snapshotUrl
-            } else {
-                url releaseUrl
-            }
-        }
+      if (project.version.contains("-SNAPSHOT")) {
+        url snapshotUrl
+      } else {
+        url releaseUrl
+      }
     }
+  }
 }
 
 /**
