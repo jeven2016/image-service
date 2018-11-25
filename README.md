@@ -2,4 +2,5 @@
 
 variables:
 tracker
-server_port : default 5805
+server_port : default 5806
+mongo_host

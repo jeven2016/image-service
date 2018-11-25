@@ -1,0 +1,64 @@
+FROM alpine
+MAINTAINER jeven2016@126.com
+
+#定义工作目录，个人理解就是用来存放自己资源的文件夹******************
+#WORKDIR /usr/local
+
+#COPY复制当前文件夹到镜像中的特定位置
+#COPY语法：
+#COPY ["<src>",... "<dest>"]  （推荐）特别适合路径中带有空格的情况
+#COPY <src>... <dest>
+#ADD 还支持通过URL从远程服务器读取资源并复制到镜像中
+#语法
+#ADD ["<src>",... "<dest>"]，特别适合路径中带有空格的情况
+#ADD <src>... <dest>，特别适合路径中带有空格的情况
+#COPY指令和ADD指令的用法非常相似，具体注意事项如下：
+#源路径可以有多个
+#源路径是相对于执行build的相对路径
+#源路径如果是本地路径，必须是build上下文中的路径
+#源路径如果是一个目录，则该目录下的所有内容都将被加入到容器，但是该目录本身不会
+#目标路径必须是绝对路径，或相对于WORKDIR的相对路径
+#目标路径如果不存在，则会创建相应的完整路径
+#目标路径如果不是一个文件，则必须使用/结束
+#路径中可以使用通配符
+#满足同等功能的情况下，推荐使用COPY指令。ADD指令更擅长读取本地tar文件并解压缩
+#无论是COPY还是ADD，源如果时候文件夹，则文件夹下面的所有内容都被加入到容器
+#注意是文件夹下面的内容，不包括文件夹
+
+#把当前的jre1.8.0_192（解压后） 加入到/app文件夹下*******************************
+COPY ["jre1.8.0_192","/usr/local/jre1.8.0_192"]
+
+#****************** 安装gclib ；解决时区问题 ***********************
+#RUN在镜像中运行命令，必须是基础镜像识别的命令
+#Java是基于GUN Standard C library(glibc)，Alpine是基于MUSL libc(mini libc)  ，需要安装gclib库
+#截止到目前最稳定的版本是2.28
+
+RUN apk --no-cache add ca-certificates wget && \
+    wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub && \
+    wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.28-r0/glibc-2.28-r0.apk && \
+    apk add glibc-2.28-r0.apk && \
+
+#解决时区错乱的问题*******************************************************
+    apk update && \
+    apk add --no-cache ca-certificates && \
+    apk add --no-cache curl bash tree tzdata && \
+    cp -rf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+
+#******************设置JAVA变量环境**********************************
+ENV JAVA_HOME /usr/local/jre1.8.0_192
+ENV PATH ${JAVA_HOME}/bin:${PATH}
+
+#****************** 运行命令 ***************************************
+#执行docker run的时候会执行CMD指令描述的命令
+#一个Dockerfile仅仅最后一个CMD起作用
+CMD ["java","-version"]
+
+
+FROM 8-jre
+
+ADD build/libs/image-service-0.1.jar ./image-service.jar
+
+EXPOSE 5805
+ENTRYPOINT ["java -jar image-service.jar"]
+

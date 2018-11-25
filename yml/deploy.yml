@@ -32,7 +32,15 @@ services:
     volumes:
     - /opt/data/fdfs/g1_storage1:/var/fdfs
     environment:
-    - TRACKER_SERVER=192.168.43.124:22122
+    - TRACKER_SERVER=192.168.1.100:22122
     - GROUP_NAME=group1
     depends_on:
     - tracker1
+   
+  image-service:
+    image: jeven2016/image-service
+    ports:
+    - '5806:5806'
+    environment:
+    - tracker=192.168.1.100:22122
+    - mongo_host=mongo  
